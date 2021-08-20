@@ -14,8 +14,6 @@ middleware = FlaskMiddleware(
     sampler=ProbabilitySampler(rate=1.0),
 )
 
-app = Flask(__name__)
-
 @app.route("/")
 def index():
     
