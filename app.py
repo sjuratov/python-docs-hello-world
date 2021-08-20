@@ -1,4 +1,15 @@
 from flask import Flask, render_template
+import logging, os
+from opencensus.ext.azure.log_exporter import AzureLogHandler
+
+logger = logging.getLogger(__name__)
+
+APPINSIGHTS_INSTRUMENTATIONKEY = os.environ.get("APPINSIGHTS_INSTRUMENTATIONKEY")
+CONNECTION_STRING = 'InstrumentationKey=' + APPINSIGHTS_INSTRUMENTATIONKEY
+
+logger.addHandler(AzureLogHandler(
+    connection_string=CONNECTION_STRING)
+)
 
 app = Flask(__name__)
 
@@ -20,6 +31,9 @@ def index():
 
     # Render HTML with count variable
     return render_template("index.html", count=count)
+
+    # Log event
+    logger.info(count)
 
 if __name__ == "__main__":
     app.run()
