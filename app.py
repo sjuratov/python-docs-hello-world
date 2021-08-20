@@ -1,14 +1,17 @@
 from flask import Flask, render_template
 import logging, os
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-
-logger = logging.getLogger(__name__)
+from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.trace.samplers import ProbabilitySampler
 
 APPINSIGHTS_INSTRUMENTATIONKEY = os.environ.get("APPINSIGHTS_INSTRUMENTATIONKEY")
 CONNECTION_STRING = 'InstrumentationKey=' + APPINSIGHTS_INSTRUMENTATIONKEY
 
-logger.addHandler(AzureLogHandler(
-    connection_string=CONNECTION_STRING)
+app = Flask(__name__)
+middleware = FlaskMiddleware(
+    app,
+    exporter=AzureExporter(connection_string=CONNECTION_STRING),
+    sampler=ProbabilitySampler(rate=1.0),
 )
 
 app = Flask(__name__)
@@ -31,9 +34,6 @@ def index():
 
     # Render HTML with count variable
     return render_template("index.html", count=count)
-
-    # Log event
-    logger.info(count)
 
 if __name__ == "__main__":
     app.run()
